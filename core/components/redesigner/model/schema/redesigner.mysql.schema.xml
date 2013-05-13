@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model package="redesigner" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" version="1.1">
+
+    <object class="reDesign" table="re_designs" extends="xPDOSimpleObject">
+        <field key="launchdate" dbtype="datetime" phptype="datetime" null="true"/>     
+        <field key="groups" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
+        <field key="name" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
+        <field key="description" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
+        <field key="mgr" dbtype="tinyint" precision="1" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="active" dbtype="tinyint" precision="1" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="notes" dbtype="text" phptype="string"/>
+        <field key="meta" dbtype="text" phptype="string"/> 
+        <field key="createdon" dbtype="datetime" phptype="datetime" null="true"/>
+        <field key="createdby" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="editedon" dbtype="datetime" phptype="datetime" null="true"/>
+        <field key="editedby" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <aggregate alias="CreatedBy" class="modUser" local="createdby" foreign="id" cardinality="one" owner="foreign"/>
+        <aggregate alias="EditedBy" class="modUser" local="editedby" foreign="id" cardinality="one" owner="foreign"/>
+        <composite alias="Map" class="reMap" local="id" foreign="design" cardinality="many" owner="local" />
+        <index alias="name" name="name" primary="false" unique="false" type="BTREE">
+            <column key="name" length="" collation="A" null="false" />
+        </index>
+    </object>
+    
+    <object class="reMap" table="re_maps" extends="xPDOSimpleObject">
+        <field key="resource" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="template" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="design" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <aggregate alias="Design" class="reDesign" local="design" foreign="id" cardinality="one" owner="foreign" />
+        <aggregate alias="Resource" class="modResource" local="resource" foreign="id" cardinality="one" owner="foreign" />
+        <aggregate alias="Template" class="modTemplate" local="template" foreign="id" cardinality="one" owner="foreign" />
+        <index alias="resource" name="resource" primary="false" unique="false" type="BTREE">
+            <column key="resource" length="" collation="A" null="false" />
+        </index>
+        <index alias="template" name="template" primary="false" unique="false" type="BTREE">
+            <column key="template" length="" collation="A" null="false" />
+        </index>
+        <index alias="design" name="design" primary="false" unique="false" type="BTREE">
+            <column key="design" length="" collation="A" null="false" />
+        </index>
+    </object>
+  
+</model>
