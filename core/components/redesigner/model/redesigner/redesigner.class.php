@@ -25,15 +25,26 @@
  class Redesigner {
     /** @var $modx modX */
     public $modx;
-    /** @var $props array */
-    public $props;
-
-    function __construct(&$modx, &$config = array())
-    {
+public $config = array();
+    function __construct(modX &$modx,array $config = array()) {
         $this->modx =& $modx;
-        $this->props =& $config;
-        $this->modx->addPackage('doodles',$this->config['modelPath']);
+ 
+        $basePath = $this->modx->getOption('redesigner.core_path',$config,$this->modx->getOption('core_path').'components/redesigner/');
+        $assetsUrl = $this->modx->getOption('redesigner.assets_url',$config,$this->modx->getOption('assets_url').'components/redesigner/');
+        $this->config = array_merge(array(
+            'basePath' => $basePath,
+            'corePath' => $basePath,
+            'modelPath' => $basePath.'model/',
+            'processorsPath' => $basePath.'processors/',
+            'templatesPath' => $basePath.'templates/',
+            'chunksPath' => $basePath.'elements/chunks/',
+            'jsUrl' => $assetsUrl.'js/',
+            'cssUrl' => $assetsUrl.'css/',
+            'assetsUrl' => $assetsUrl,
+            'connectorUrl' => $assetsUrl.'connector.php',
+        ),$config);
+        $this->modx->addPackage('redesigner',$this->config['modelPath']);
+        $this->modx->lexicon->load('redesigner:default');
     }
-
 
 }
