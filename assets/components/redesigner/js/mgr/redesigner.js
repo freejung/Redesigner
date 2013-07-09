@@ -19,54 +19,12 @@
  * @package redesigner
  */
  
- var Redesigner = function(config) {
+var Redesigner = function(config) {
     config = config || {};
     Redesigner.superclass.constructor.call(this,config);
 };
 Ext.extend(Redesigner,Ext.Component,{
-    page:{},window:{},grid:{},tree:{},panel:{},combo:{},config: {}
+    page:{},window:{},grid:{},tree:{},panel:{},combo:{},config: {},view: {}
 });
-Ext.reg('redesigner',Redesigner);
+Ext.reg('Redesigner',Redesigner);
 Redesigner = new Redesigner();
-
-Redesigner.combo.Binary = function(config) {
-    config = config || {};
-    Ext.applyIf(config,{
-        store: new Ext.data.ArrayStore({
-            id: 0
-            ,fields: ['value','text']
-            ,data: [
-            	    ['1', 'True'],
-            	    ['0', 'False'],
-            ]
-        })
-        ,mode: 'local'
-        ,displayField: 'text'
-        ,valueField: 'value'
-    });
-    Redesigner.combo.Binary.superclass.constructor.call(this,config);
-};
-Ext.extend(Redesigner.combo.Binary,MODx.combo.ComboBox);
-Ext.reg('redesigner-combo-binary',Redesigner.combo.Binary);
-
-Redesigner.window.CreateDesign = function(config) {
-    config = config || {};
-    Ext.applyIf(config,{
-        title: _('redesigner.design_create~~Create Design')
-        ,url: Redesigner.config.connectorUrl
-        ,fields: [{
-            xtype: 'textfield'
-            ,fieldLabel: _('designs.name~~Name')
-            ,name: 'name'
-            ,anchor: '100%'
-        },{
-            xtype: 'textfield'
-            ,fieldLabel: _('documents.description~~Description')
-            ,name: 'description'
-            ,anchor: '100%'
-        }]
-    });
-    Redesigner.window.CreateDesign.superclass.constructor.call(this,config);
-};
-Ext.extend(Redesigner.window.CreateDesign,MODx.Window);
-Ext.reg('redesigner-window-design-create',Redesigner.window.CreateDesign);

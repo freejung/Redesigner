@@ -27,9 +27,11 @@ Redesigner.grid.Designs = function(config) {
         id: 'redesigner-grid-designs'
         ,url: Redesigner.config.connectorUrl
         ,baseParams: { action: 'mgr/design/getList' }
-        ,fields: ['id','name','description','active','mgr']
+        ,save_action: 'mgr/design/updateFromGrid'
+        ,fields: ['id','name','description','active','mgr','groups','notes']
         ,paging: true
         ,remoteSort: true
+        ,autosave: true
         ,anchor: '97%'
         ,autoExpandColumn: 'name'
         ,columns: [{
@@ -67,7 +69,7 @@ Redesigner.grid.Designs = function(config) {
         },'->',{
             xtype: 'textfield'
             ,id: 'designs-search-filter'
-            ,emptyText: _('designs.search...')
+            ,emptyText: _('designs.search')
             ,listeners: {
                 'change': {fn:this.search,scope:this}
                 ,'render': {fn: function(cmp) {
@@ -86,5 +88,319 @@ Redesigner.grid.Designs = function(config) {
     });
     Redesigner.grid.Designs.superclass.constructor.call(this,config)
 };
-Ext.extend(Redesigner.grid.Designs,MODx.grid.Grid);
+Ext.extend(Redesigner.grid.Designs,MODx.grid.Grid,{
+    search: function(tf,nv,ov) {
+        var s = this.getStore();
+        s.baseParams.query = tf.getValue();
+        this.getBottomToolbar().changePage(1);
+        this.refresh();
+    }
+    ,getMenu: function() {
+        return [{
+            text: _('redesigner.design_update')
+            ,handler: this.updateDesign
+        },'-',{
+            text: _('redesigner.design_remove')
+            ,handler: this.removeDesign
+        }];
+    }
+    ,updateDesign: function(btn,e) {
+        this.updateDesignWindow = MODx.load({
+            xtype: 'redesigner-window-design-update'
+            ,record: this.menu.record
+            ,baseParams: {action: 'mgr/design/update'}
+            ,listeners: {
+                'success': {fn:this.refresh,scope:this}
+            }
+        });
+        this.updateDesignWindow.setValues(this.menu.record);
+        this.updateDesignWindow.show(e.target);
+    }
+
+    ,removeDesign: function() {
+        MODx.msg.confirm({
+            title: _('redesigner.design_remove')
+            ,text: _('redesigner.design_remove_confirm')
+            ,url: this.config.url
+            ,params: {
+                action: 'mgr/design/remove'
+                ,id: this.menu.record.id
+            }
+            ,listeners: {
+                'success': {fn:this.refresh,scope:this}
+            }
+        });
+    }
+});
 Ext.reg('redesigner-grid-designs',Redesigner.grid.Designs);
+
+Redesigner.window.UpdateDesign = function(config) {
+    config = config || {};
+    Ext.applyIf(config,{
+        title: _('redesigner.design_update')
+        ,url: Redesigner.config.connectorUrl
+		,baseParams: {
+            action: 'mgr/design/update'
+        }
+        ,closeAction: 'close'
+        ,fields: [{
+            xtype: 'hidden'
+            ,name: 'id'
+        },{
+            xtype: 'textfield'
+            ,fieldLabel: _('designs.name')
+            ,name: 'name'
+            ,anchor: '100%'
+        },{
+            xtype: 'textfield'
+            ,fieldLabel: _('designs.description')
+            ,name: 'description'
+            ,anchor: '100%'
+        },{
+                           xtype: 'redesigner-superbox-groups'
+                           ,fieldLabel: _('groups')
+                           ,name: 'groups'
+                           ,hiddenName: 'groups'
+                           ,anchor: '100%'
+                       },{
+            xtype: 'xcheckbox'
+            ,boxLabel: _('designs.mgr')
+            ,hideLabel: true
+            ,description: _('designs.mgr_desc')
+            ,name: 'mgr'
+            ,id: 'redesigner-designs-mgr'
+            ,inputValue: 1
+
+        },{
+            xtype: 'xcheckbox'
+            ,boxLabel: _('designs.active')
+            ,hideLabel: true
+            ,description: _('designs.active_desc')
+            ,name: 'active'
+            ,id: 'redesigner-designs-active'
+            ,inputValue: 1
+
+        },{
+            xtype: 'textarea'
+            ,fieldLabel: _('designs.notes')
+            ,name: 'notes'
+            ,anchor: '100%'
+        },{
+                    xtype: 'redesigner-grid-maps'
+                    ,cls: 'main-wrapper'
+                    ,preventRender: true
+                    ,baseParams: { 
+                        action: 'mgr/map/getList'
+                        ,query: config.record.id
+                    }
+                }]
+    });
+    Redesigner.window.UpdateDesign.superclass.constructor.call(this,config);
+};
+Ext.extend(Redesigner.window.UpdateDesign,MODx.Window);
+Ext.reg('redesigner-window-design-update',Redesigner.window.UpdateDesign);
+
+Redesigner.window.UpdateMap = function(config) {
+    config = config || {};
+    Ext.applyIf(config,{
+        title: _('redesigner.map_update')
+        ,url: Redesigner.config.connectorUrl
+		,baseParams: {
+            action: 'mgr/map/update'
+        }
+        ,fields: [{
+            xtype: 'hidden'
+            ,name: 'id'
+        },{
+            xtype: 'textfield'
+            ,fieldLabel: _('maps.resource')
+            ,name: 'resource'
+            ,anchor: '100%'
+        },{
+            xtype: 'redesigner-combo-template'
+            ,fieldLabel: _('maps.template')
+            ,name: 'template'
+            ,hiddenName: 'template'
+            ,anchor: '100%'
+        }]
+    });
+    Redesigner.window.UpdateMap.superclass.constructor.call(this,config);
+};
+Ext.extend(Redesigner.window.UpdateMap,MODx.Window);
+Ext.reg('redesigner-window-map-update',Redesigner.window.UpdateMap);
+
+Redesigner.combo.Binary = function(config) {
+    config = config || {};
+    Ext.applyIf(config,{
+        store: new Ext.data.ArrayStore({
+            id: 0
+            ,fields: ['value','text']
+            ,data: [
+            	    ['1', 'True'],
+            	    ['0', 'False'],
+            ]
+        })
+        ,mode: 'local'
+        ,displayField: 'text'
+        ,valueField: 'value'
+    });
+    Redesigner.combo.Binary.superclass.constructor.call(this,config);
+};
+Ext.extend(Redesigner.combo.Binary,MODx.combo.ComboBox);
+Ext.reg('redesigner-combo-binary',Redesigner.combo.Binary);
+
+Redesigner.combo.Template = function(config) {
+    config = config || {};
+    Ext.applyIf(config,{
+        url: MODx.config.connectors_url+'element/template.php'
+        ,baseParams: { action: 'getList' }
+        ,fields: ['id', 'templatename']
+        ,displayField: 'templatename'
+        ,pageSize: 20
+        ,valueField: 'id'
+    });
+    Redesigner.combo.Template.superclass.constructor.call(this,config);
+};
+Ext.extend(Redesigner.combo.Template,MODx.combo.ComboBox);
+Ext.reg('redesigner-combo-template',Redesigner.combo.Template);
+
+Redesigner.combo.Groups = function (config) {
+    config = config || {};
+    Ext.applyIf(config, {
+      xtype:'superboxselect'
+        ,triggerAction: 'all'
+   ,mode: 'remote'
+        ,valueField: 'id'
+        ,displayField: 'name'
+        ,resizable: true
+   ,store: new Ext.data.JsonStore({ 
+      id:'id',
+      autoLoad: true,
+      root:'results',
+      fields: ['name', 'id'],
+      url: MODx.config.connectors_url+'security/group.php',
+      baseParams:{
+         action: 'getList'
+         ,limit: 0
+      }
+   })
+    });
+    Redesigner.combo.Groups.superclass.constructor.call(this, config);
+};
+Ext.extend(Redesigner.combo.Groups, Ext.ux.form.SuperBoxSelect);
+Ext.reg('redesigner-superbox-groups', Redesigner.combo.Groups );
+
+Redesigner.window.CreateDesign = function(config) {
+    config = config || {};
+    Ext.applyIf(config,{
+        title: _('redesigner.design_create')
+        ,url: Redesigner.config.connectorUrl
+        ,fields: [{
+            xtype: 'textfield'
+            ,fieldLabel: _('designs.name')
+            ,name: 'name'
+            ,anchor: '100%'
+        },{
+            xtype: 'textfield'
+            ,fieldLabel: _('designs.description')
+            ,name: 'description'
+            ,anchor: '100%'
+        },{
+                           xtype: 'redesigner-superbox-groups'
+                           ,fieldLabel: _('groups')
+                           ,name: 'groups'
+                           ,hiddenName: 'groups'
+                           ,anchor: '100%'
+                       },{
+            xtype: 'xcheckbox'
+            ,boxLabel: _('designs.mgr')
+            ,hideLabel: true
+            ,description: _('designs.mgr_desc')
+            ,name: 'mgr'
+            ,id: 'redesigner-designs-mgr'
+            ,inputValue: 1
+
+        },{
+            xtype: 'xcheckbox'
+            ,boxLabel: _('designs.active')
+            ,hideLabel: true
+            ,description: _('designs.active_desc')
+            ,name: 'active'
+            ,id: 'redesigner-designs-active'
+            ,inputValue: 1
+
+        },{
+            xtype: 'textarea'
+            ,fieldLabel: _('designs.notes')
+            ,name: 'notes'
+            ,anchor: '100%'
+        }]
+    });
+    Redesigner.window.CreateDesign.superclass.constructor.call(this,config);
+};
+Ext.extend(Redesigner.window.CreateDesign,MODx.Window);
+Ext.reg('redesigner-window-design-create',Redesigner.window.CreateDesign);
+
+Redesigner.grid.Maps = function(config) {
+    config = config || {};
+    Ext.applyIf(config,{
+        id: 'redesigner-grid-maps'
+        ,url: Redesigner.config.connectorUrl
+        ,baseParams: { action: 'mgr/map/getList' }
+        ,save_action: 'mgr/map/updateFromGrid'
+        ,fields: ['id','resource','template','resourcetitle']
+        ,paging: true
+        ,remoteSort: true
+        ,autosave: true
+        ,anchor: '97%'
+        ,autoExpandColumn: 'resource'
+        ,columns: [{
+            header: _('id')
+            ,dataIndex: 'id'
+            ,sortable: true
+            ,width: 20
+        },{
+            header: _('map.resource')
+            ,dataIndex: 'resourcetitle'
+            ,sortable: true
+            ,width: 100
+            /*,editor: { xtype: 'textfield' }*/
+        },{
+            header: _('map.template')
+            ,dataIndex: 'template'
+            ,sortable: true
+            ,width: 100
+            ,editor: { xtype: 'redesigner-combo-template', renderer:true }
+        }]
+    });
+    Redesigner.grid.Maps.superclass.constructor.call(this,config)
+};
+Ext.extend(Redesigner.grid.Maps,MODx.grid.Grid,{
+    search: function(tf,nv,ov) {
+        var s = this.getStore();
+        s.baseParams.query = tf.getValue();
+        this.getBottomToolbar().changePage(1);
+        this.refresh();
+    }
+    ,getMenu: function() {
+        return [{
+            text: _('redesigner.map_update')
+            ,handler: this.updateDesign
+        }];
+    }
+    ,updateDesign: function(btn,e) {
+        if (!this.updateMapWindow) {
+            this.updateMapWindow = MODx.load({
+                xtype: 'redesigner-window-map-update'
+                ,record: this.menu.record
+                ,baseParams: {action: 'mgr/map/update'}
+                ,listeners: {
+                    'success': {fn:this.refresh,scope:this}
+                }
+            });
+        }
+        this.updateMapWindow.setValues(this.menu.record);
+        this.updateMapWindow.show(e.target);
+    }
+});
+Ext.reg('redesigner-grid-maps',Redesigner.grid.Maps);

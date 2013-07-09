@@ -23,21 +23,27 @@
  */
 
 
-class DesignGetListProcessor extends modObjectGetListProcessor {
-    public $classKey = 'reDesign';
+class MapGetListProcessor extends modObjectGetListProcessor {
+    public $classKey = 'reMap';
     public $languageTopics = array('redesigner:default');
-    public $defaultSortField = 'name';
+    public $defaultSortField = 'resource';
     public $defaultSortDirection = 'ASC';
-    public $objectType = 'redesigner.design';
+    public $objectType = 'redesigner.map';
     public function prepareQueryBeforeCount(xPDOQuery $c) {
         $query = $this->getProperty('query');
         if (!empty($query)) {
             $c->where(array(
-                'name:LIKE' => '%'.$query.'%',
-                'OR:description:LIKE' => '%'.$query.'%',
+                'design' => $query,
             ));
         }
         return $c;
     }
+    public function prepareRow(xPDOObject $object) {
+        $output = $object->toArray();
+        if($resource = $this->modx->getObject('modResource',$output['resource'])) {
+            $output['resourcetitle'] = $resource->get('pagetitle');
+        }
+        return $output;
+    }
 }
-return 'DesignGetListProcessor';
+return 'MapGetListProcessor';

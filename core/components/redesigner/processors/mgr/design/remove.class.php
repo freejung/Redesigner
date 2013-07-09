@@ -1,6 +1,7 @@
-/** 
- * JS file for Redesigner extra
- * 
+<?php
+/**
+ * Designs remove processor for Redesigner extra
+ *
  * Copyright 2013 by Eli Snyder <freejung@gmail.com>
  * Created on 05-10-2013
  *
@@ -16,5 +17,14 @@
  * You should have received a copy of the GNU General Public License along with
  * Redesigner; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place, Suite 330, Boston, MA 02111-1307 USA
+ *
  * @package redesigner
+ * @subpackage processors
  */
+
+class DesignRemoveProcessor extends modObjectRemoveProcessor {
+    public $classKey = 'reDesign';
+    public $languageTopics = array('redesigner:default');
+    public $objectType = 'redesigner.design';
+}
+return 'DesignRemoveProcessor';

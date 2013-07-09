@@ -33,4 +33,15 @@
  *
  * @package redesigner
  **/
+$_lang['redesigner.design_create'] = 'Create Design';
+
+$_lang['designs.name'] = 'Name';
+
+$_lang['designs.description'] = 'Description';
+
+$_lang['redesigner.management'] = 'Redesigner';
+
+$_lang['redesigner'] = 'Designs';
+
+$_lang['redesigner.management_desc'] = 'A design is a set of templates mapped to resources, allowing the site to be viewed as it would be with these templates in place.';
 

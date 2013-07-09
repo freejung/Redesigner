@@ -1,6 +1,6 @@
 <?php
 /**
- * en properties topic lexicon file for Redesigner extra
+ * Designs create processor for Redesigner extra
  *
  * Copyright 2013 by Eli Snyder <freejung@gmail.com>
  * Created on 05-10-2013
@@ -19,23 +19,13 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  *
  * @package redesigner
+ * @subpackage processors
  */
 
-/**
- * Description
- * -----------
- * en properties topic lexicon strings
- *
- * Variables
- * ---------
- * @var $modx modX
- * @var $scriptProperties array
- *
- * @package redesigner
- **/
 
-$_lang['redesigner.management'] = 'Redesigns';
-
-$_lang['redesigner'] = '';
-
-$_lang['redesigner.management_desc'] = 'A design is a set of templates mapped to resources, allowing the site to be viewed as it would be with these templates in place.';
+class DesignCreateProcessor extends modObjectCreateProcessor {
+    public $classKey = 'reDesign';
+    public $languageTopics = array('redesigner:default');
+    public $objectType = 'redesigner.design';
+}
+return 'DesignCreateProcessor';

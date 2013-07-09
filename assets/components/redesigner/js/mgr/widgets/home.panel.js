@@ -28,7 +28,7 @@ Redesigner.panel.Home = function(config) {
         ,baseCls: 'modx-formpanel'
         ,cls: 'container'
         ,items: [{
-            html: '<h2>'+_('redesigner.management~~Redesigns')+'</h2>'
+            html: '<h2>'+_('redesigner.management')+'</h2>'
             ,border: false
             ,cls: 'modx-page-header'
         },{
@@ -39,7 +39,7 @@ Redesigner.panel.Home = function(config) {
                 title: _('redesigner')
                 ,defaults: { autoHeight: true }
                 ,items: [{
-                    html: '<p>'+_('redesigner.management_desc~~A design is a set of templates mapped to resources, allowing the site to be viewed as it would be with these templates in place.')+'</p>'
+                    html: '<p>'+_('redesigner.management_desc')+'</p>'
                     ,border: false
                     ,bodyCssClass: 'panel-desc'
                 },{
@@ -48,13 +48,6 @@ Redesigner.panel.Home = function(config) {
                     ,preventRender: true
                 }]
             }]
-            // only to redo the grid layout after the content is rendered
-            // to fix overflow components' panels, especially when scroll bar is shown up
-            ,listeners: {
-                'afterrender': function(tabPanel) {
-                    tabPanel.doLayout();
-                }
-            }
         }]
     });
     Redesigner.panel.Home.superclass.constructor.call(this,config);
