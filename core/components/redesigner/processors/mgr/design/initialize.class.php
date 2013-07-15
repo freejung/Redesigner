@@ -1,6 +1,6 @@
 <?php
 /**
- * Designs grid update processor for Redesigner extra
+ * Designs update processor for Redesigner extra
  *
  * Copyright 2013 by Eli Snyder <freejung@gmail.com>
  * Created on 05-10-2013
@@ -23,17 +23,16 @@
  */
 
 
-require_once (dirname(__FILE__).'/update.class.php');
-class MapUpdateFromGridProcessor extends MapUpdateProcessor {
-    public function initialize() {
-        $data = $this->getProperty('data');
-        if (empty($data)) return $this->modx->lexicon('invalid_data');
-        $data = $this->modx->fromJSON($data);
-        if (empty($data)) return $this->modx->lexicon('invalid_data');
-        $this->setProperties($data);
-        $this->unsetProperty('data');
- 
-        return parent::initialize();
+class DesignInitializeProcessor extends modObjectUpdateProcessor {
+    public $classKey = 'reDesign';
+    public $languageTopics = array('redesigner:default');
+    public $objectType = 'redesigner.design';
+    
+    public function beforeSave() {
+    	$this->modx->setLogLevel(modX::LOG_LEVEL_DEBUG);
+    	$this->modx->log(modX::LOG_LEVEL_DEBUG, "running initialize design processor");        
+        $this->object->initializeAllResources();
+        return parent::beforeSave();
     }
 }
-return 'MapUpdateFromGridProcessor';
+return 'DesignInitializeProcessor';

@@ -32,6 +32,9 @@ $modx->redesigner = new Redesigner($modx);
  
 $modx->lexicon->load('redesigner:default');
  
+$modx->setLogLevel(modX::LOG_LEVEL_DEBUG);
+$modx->log(modX::LOG_LEVEL_DEBUG, 'redesign connector request: '.print_r($_REQUEST,true)); 
+ 
 /* handle request */
 $path = $modx->getOption('processorsPath',$modx->redesigner->config,$corePath.'processors/');
 $modx->request->handleRequest(array(

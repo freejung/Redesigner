@@ -186,18 +186,37 @@ Redesigner.window.UpdateDesign = function(config) {
             ,name: 'notes'
             ,anchor: '100%'
         },{
-                    xtype: 'redesigner-grid-maps'
-                    ,cls: 'main-wrapper'
-                    ,preventRender: true
-                    ,baseParams: { 
-                        action: 'mgr/map/getList'
-                        ,query: config.record.id
-                    }
-                }]
+            xtype: 'button'
+            ,text: 'Initialize All Resources'
+            ,handler: this.initializeDesign
+            ,design: config.record.id
+        },{
+            xtype: 'redesigner-grid-maps'
+            ,cls: 'main-wrapper'
+            ,preventRender: true
+            ,design: config.record.id
+            ,baseParams: { 
+                action: 'mgr/map/getList'
+                ,query: config.record.id
+	        }
+        }]
     });
     Redesigner.window.UpdateDesign.superclass.constructor.call(this,config);
 };
-Ext.extend(Redesigner.window.UpdateDesign,MODx.Window);
+Ext.extend(Redesigner.window.UpdateDesign,MODx.Window, {
+	initializeDesign: function(btn,e) {
+	    MODx.msg.confirm({
+		   title: 'Are you sure?'
+		   ,text: 'Do you want to initialize this design to all resources with their current templates?'
+		   ,url: Redesigner.config.connectorUrl
+		   ,params: {
+		   	 action: 'mgr/design/initialize'
+		     ,id: btn.design
+		   },
+		});
+    }
+	
+});
 Ext.reg('redesigner-window-design-update',Redesigner.window.UpdateDesign);
 
 Redesigner.window.UpdateMap = function(config) {
@@ -253,7 +272,7 @@ Redesigner.combo.Template = function(config) {
     config = config || {};
     Ext.applyIf(config,{
         url: MODx.config.connectors_url+'element/template.php'
-        ,baseParams: { action: 'getList' }
+        ,baseParams: { action: 'getList', limit: 0 }
         ,fields: ['id', 'templatename']
         ,displayField: 'templatename'
         ,pageSize: 20
@@ -371,6 +390,31 @@ Redesigner.grid.Maps = function(config) {
             ,sortable: true
             ,width: 100
             ,editor: { xtype: 'redesigner-combo-template', renderer:true }
+        }],tbar:[{
+            text: _('redesigner.map_create')
+            ,handler: { 
+                xtype: 'redesigner-window-map-create' 
+                ,blankValues: true 
+                ,design : config.design
+                ,baseParams: {action: 'mgr/map/create'} }
+        },'->',{
+            xtype: 'textfield'
+            ,id: 'maps-search-filter'
+            ,emptyText: _('maps.search')
+            ,listeners: {
+                'change': {fn:this.search,scope:this}
+                ,'render': {fn: function(cmp) {
+                    new Ext.KeyMap(cmp.getEl(), {
+                        key: Ext.EventObject.ENTER
+                        ,fn: function() {
+                            this.fireEvent('change',this);
+                            this.blur();
+                            return true;
+                        }
+                        ,scope: cmp
+                    });
+                },scope:this}
+            }
         }]
     });
     Redesigner.grid.Maps.superclass.constructor.call(this,config)
@@ -385,10 +429,10 @@ Ext.extend(Redesigner.grid.Maps,MODx.grid.Grid,{
     ,getMenu: function() {
         return [{
             text: _('redesigner.map_update')
-            ,handler: this.updateDesign
+            ,handler: this.updateMap
         }];
     }
-    ,updateDesign: function(btn,e) {
+    ,updateMap: function(btn,e) {
         if (!this.updateMapWindow) {
             this.updateMapWindow = MODx.load({
                 xtype: 'redesigner-window-map-update'
@@ -404,3 +448,33 @@ Ext.extend(Redesigner.grid.Maps,MODx.grid.Grid,{
     }
 });
 Ext.reg('redesigner-grid-maps',Redesigner.grid.Maps);
+
+Redesigner.window.CreateMap = function(config) {
+    config = config || {};
+    Ext.applyIf(config,{
+        title: _('redesigner.map_create')
+        ,url: Redesigner.config.connectorUrl
+        ,fields: [{
+            xtype: 'hidden'
+            ,name: 'id'
+        },{
+            xtype: 'hidden'
+            ,name: 'design'
+            ,value: config.design
+        },{
+            xtype: 'textfield'
+            ,fieldLabel: _('maps.resource')
+            ,name: 'resource'
+            ,anchor: '100%'
+        },{
+            xtype: 'redesigner-combo-template'
+            ,fieldLabel: _('maps.template')
+            ,name: 'template'
+            ,hiddenName: 'template'
+            ,anchor: '100%'
+        }]
+    });
+    Redesigner.window.CreateMap.superclass.constructor.call(this,config);
+};
+Ext.extend(Redesigner.window.CreateMap,MODx.Window);
+Ext.reg('redesigner-window-map-create',Redesigner.window.CreateMap);
