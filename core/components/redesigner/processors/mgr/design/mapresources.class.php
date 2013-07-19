@@ -30,8 +30,22 @@ class DesignInitializeProcessor extends modObjectUpdateProcessor {
     
     public function beforeSave() {
     	$this->modx->setLogLevel(modX::LOG_LEVEL_DEBUG);
-    	$this->modx->log(modX::LOG_LEVEL_DEBUG, "running initialize design processor");        
-        $this->object->initializeAllResources();
+    	$this->modx->log(modX::LOG_LEVEL_DEBUG, "running initialize design processor"); 
+    	
+    	$whereArray = array();
+		if(!empty($this->object->oldTemplates[0])) {
+			$this->modx->log(modX::LOG_LEVEL_DEBUG, 'old templates not empty: '.print_r($this->object->oldTemplates,true)); 
+			$whereArray = array_merge(array('template:IN' => $this->object->oldTemplates), $whereArray);
+		}
+		if(!empty($parents)) {
+			$this->modx->log(modX::LOG_LEVEL_DEBUG, 'parents not empty: '.$parents);
+			$parentsArray = explode(',', str_replace(' ', '', $parents));
+			$whereArray = array_merge(array('parent:IN' => $parentsArray), $whereArray);
+		}
+		if(!empty($this->object->whereJSON)) {
+			$whereArray = array_merge($whereArray, $this->modx->fromJSON($this->object->whereJSON));
+		}
+    	$this->object->initializeAllResources($this->object->newTemplate, $this->object->mappedTo, $whereArray);
         return parent::beforeSave();
     }
 }

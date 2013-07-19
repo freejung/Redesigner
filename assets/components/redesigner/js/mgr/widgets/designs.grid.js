@@ -187,8 +187,8 @@ Redesigner.window.UpdateDesign = function(config) {
             ,anchor: '100%'
         },{
             xtype: 'button'
-            ,text: 'Initialize All Resources'
-            ,handler: this.initializeDesign
+            ,text: 'Map Resources'
+            ,handler: this.mapResources
             ,design: config.record.id
         },{
             xtype: 'redesigner-grid-maps'
@@ -204,16 +204,16 @@ Redesigner.window.UpdateDesign = function(config) {
     Redesigner.window.UpdateDesign.superclass.constructor.call(this,config);
 };
 Ext.extend(Redesigner.window.UpdateDesign,MODx.Window, {
-	initializeDesign: function(btn,e) {
-	    MODx.msg.confirm({
-		   title: 'Are you sure?'
-		   ,text: 'Do you want to initialize this design to all resources with their current templates?'
-		   ,url: Redesigner.config.connectorUrl
-		   ,params: {
-		   	 action: 'mgr/design/initialize'
-		     ,id: btn.design
-		   },
-		});
+    
+	mapResources: function(btn,e) {
+        if (!this.mapResourcesWindow) {
+            this.mapResourcesWindow = MODx.load({
+                xtype: 'redesigner-window-design-mapresources'
+                ,baseParams: {action: 'mgr/design/mapResources'}
+                ,id: btn.design
+            });
+        }
+        this.mapResourcesWindow.show(e.target);
     }
 	
 });
@@ -282,6 +282,30 @@ Redesigner.combo.Template = function(config) {
 };
 Ext.extend(Redesigner.combo.Template,MODx.combo.ComboBox);
 Ext.reg('redesigner-combo-template',Redesigner.combo.Template);
+
+Redesigner.combo.SuperTemplate = function (config) {
+    config = config || {};
+    Ext.applyIf(config, {triggerAction: 'all'
+   ,mode: 'remote'
+        ,valueField: 'id'
+        ,displayField: 'templatename'
+        ,resizable: true
+   ,store: new Ext.data.JsonStore({ 
+      id:'id',
+      autoLoad: true,
+      root:'results',
+      fields: ['templatename', 'id'],
+      url: MODx.config.connectors_url+'element/template.php',
+      baseParams:{
+         action: 'getList'
+         ,limit: 0
+      }
+   })
+    });
+    Redesigner.combo.SuperTemplate.superclass.constructor.call(this, config);
+};
+Ext.extend(Redesigner.combo.SuperTemplate, Ext.ux.form.SuperBoxSelect);
+Ext.reg('redesigner-superbox-template', Redesigner.combo.SuperTemplate );
 
 Redesigner.combo.Groups = function (config) {
     config = config || {};
@@ -478,3 +502,44 @@ Redesigner.window.CreateMap = function(config) {
 };
 Ext.extend(Redesigner.window.CreateMap,MODx.Window);
 Ext.reg('redesigner-window-map-create',Redesigner.window.CreateMap);
+
+Redesigner.window.mapResources = function(config) {
+    config = config || {};
+    Ext.applyIf(config,{
+        title: _('redesigner.design_mapresources')
+        ,url: Redesigner.config.connectorUrl
+		,baseParams: {
+            action: 'mgr/design/mapresources'
+        }
+        ,closeAction: 'close'
+        ,fields: [{
+            xtype: 'hidden'
+            ,name: 'id'
+            ,value: config.id
+        },{
+            xtype: 'redesigner-combo-template'
+            ,fieldLabel: _('maps.newTemplate')
+            ,name: 'newTemplate'
+            ,hiddenName: 'newTemplate'
+            ,anchor: '100%'
+        },{
+            xtype: 'redesigner-superbox-template'
+            ,fieldLabel: _('maps.mappedTo')
+            ,name: 'mappedTo[]'
+            ,anchor: '100%'
+        },{
+            xtype: 'redesigner-superbox-template'
+            ,fieldLabel: _('maps.oldTemplate')
+            ,name: 'oldTemplates[]'
+            ,anchor: '100%'
+        },{
+            xtype: 'textfield'
+            ,fieldLabel: _('maps.parent')
+            ,name: 'parents'
+            ,anchor: '100%'
+        }]
+    });
+    Redesigner.window.mapResources.superclass.constructor.call(this,config);
+};
+Ext.extend(Redesigner.window.mapResources,MODx.Window);
+Ext.reg('redesigner-window-design-mapresources',Redesigner.window.mapResources);
